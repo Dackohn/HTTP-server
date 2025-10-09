@@ -1,10 +1,11 @@
 services:
-  pdf_server:
+  server:
     build: .
-    container_name: pdf_server
+    container_name: server
     ports:
       - "8000:8000"
+    working_dir: /app
     volumes:
       #change this to the directory that must run on the server
-      - "D:/lectures(anul 4)/Programarea in retea/Laboratory 1 -HTTP Server/contents : /app/contents"
+      - "D:/lectures(anul 4)/Programarea in retea/Laboratory 1 -HTTP Server/contents:/app/contents"
     command: ["python", "server.py", "contents"]
