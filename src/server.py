@@ -1,6 +1,7 @@
 import os
 import sys
 import socket
+from urllib.parse import unquote
 
 MIME_TYPES = {
     ".html": "text/html",
@@ -45,7 +46,8 @@ def handle_client(conn, base_dir):
         conn.close()
         return
 
-    method, path = parts[0], parts[1]
+    method, raw_path = parts[0], parts[1]
+    path = unquote(raw_path)
     if method != "GET":
         conn.sendall(b"HTTP/1.1 405 Method Not Allowed\r\n\r\n")
         conn.close()
