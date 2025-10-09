@@ -1,7 +1,7 @@
 import os
 import sys
 import socket
-from urllib.parse import unquote
+from urllib.parse import unquote,quote
 
 MIME_TYPES = {
     ".html": "text/html",
@@ -21,6 +21,14 @@ def generate_directory_listing(path, base_url):
     <hr>
     <ul>
 """
+
+    if base_url.strip("/") != "":
+        parent_url = os.path.dirname(base_url.rstrip("/"))
+        if parent_url == "":
+            parent_url = "/"
+        html += f'        <li><a href="{quote(parent_url)}">Back to parent directory</a></li>\n'
+
+
     for item in items:
         item_path = os.path.join(base_url, item).replace("\\", "/")
         if os.path.isdir(os.path.join(path, item)):
