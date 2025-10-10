@@ -26,35 +26,43 @@ The container is started by simply running the command ```docker compose up --bu
 ## 4. Running the Server
 
 The command that is use to run the server is ```python server.py <served_directory>```. The current docker_compose runs the command automaticaly when the container is created:
+
 <img src="docks/server_start.png" width="300">
 
 ## 5. Contents of the Served Directory
 
 Accessing the main endpoint of the server displays all files and folders in the served directory, sorted alphabetically, as shown in the image below:
+
 <img src="docks/served_directory.png" width="300">
 
 ## 6. Accesing different types of files
 ### 404 Error
 This screenshot demonstrates the server's response when attempting to access a file that does not exist. The server correctly returns a 404 Not Found error.
+
 <img src="docks/inexistend_file.png" width="300">
 
 ### HTML File with Image
 This screenshot shows how the server serves an HTML file containing an embedded image. The page is rendered correctly in the browser, displaying both the HTML content and the image.
+
 <img src="docks/html_with_image.png" width="300">
 
 ### PDF File
 This image illustrates the server delivering a PDF file. The PDF is accessible and can be opened or downloaded by the client.
+
 <img src="docks/pdf_file.png" width="300">
 
 ### PNG File
 This screenshot shows the server serving a PNG image. The image loads correctly in the browser, demonstrating proper handling of binary file types.
+
 <img src="docks/png_file.png" width="300">
 
 ## 7. Running the client
 The command that is used to run the client is ```python client.py <target_ip> <target_port> <target_file> <download_directory>```. The command output in the terminal looks like this:
+
 <img src="docks/running_client.png" width="300">
 
 The file together with the missing folder where succesfuly created:
+
 <img src="docks/report_test.png" width="300">
 
 ## 8. Directory listing
@@ -67,10 +75,12 @@ For this section we will review the page generated for the repository *report_te
 In this part of the experiment, I connected to a friend’s HTTP server hosted on the same local network.
 
 To establish the connection, I first determined their local IP address using the `ipconfig` command . The server was accessible at the IP address `192.168.1.6` on port `8080` as seen in the image:
+
 <img src="docks/ipconfig.png" width="300">
 
 I then used our custom client to send requests directly to the server:
 ```python client.py 192.168.1.6 8080 subdir/1.pdf /report_test```
+
 <img src="docks/running_client.png" width="300">
 
 This allowed us to successfully retrieve files hosted on their machine.
