@@ -11,7 +11,8 @@ def main():
     port = int(sys.argv[2])
     filename = sys.argv[3]
     subdir = sys.argv[4] if len(sys.argv) > 4 else ""
-
+    if subdir.startswith("/"):
+        subdir = subdir.lstrip("/")
     download_dir = os.path.join("contents", subdir)
     request = f"GET /{filename} HTTP/1.0\r\nHost: {host}\r\n\r\n"
 
