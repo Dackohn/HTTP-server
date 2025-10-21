@@ -88,7 +88,7 @@ def main():
     base_dir = sys.argv[1]
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(("0.0.0.0", 8000))
-    server_socket.listen(1)
+    server_socket.listen(10)
 
     print("Serving HTTP on port 8000...")
 

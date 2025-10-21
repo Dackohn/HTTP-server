@@ -2,8 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY src/server.py src/client.py ./
+COPY src/ ./
 
 EXPOSE 8000
 
-CMD ["python", "server.py", "./contents"]
+CMD ["python", "Multithreaded_http_server.py", "./contents"]

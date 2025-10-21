@@ -8,4 +8,4 @@ services:
     volumes:
       #change this to the directory that must run on the server
       - "D:/lectures(anul 4)/Programarea in retea/Laboratory 1 -HTTP Server/contents:/app/contents"
-    command: ["python", "server.py", "contents"]
+    command: ["python", "Multithreaded_http_server.py", "contents"]
