@@ -17,7 +17,7 @@ counter_lock = Lock()
 
 rate_limit_data = {}
 rate_limit_lock = Lock()
-RATE_LIMIT = 300
+RATE_LIMIT = 5
 
 
 def generate_directory_listing(path, base_url):

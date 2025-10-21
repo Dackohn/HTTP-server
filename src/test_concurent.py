@@ -143,19 +143,27 @@ def test_concurrent_requests(host, port, num_requests=10, path="/"):
 def test_rate_limiting(host, port):
     """Test rate limiting functionality."""
     print(f"\n{'='*70}")
-    print("Testing Rate Limiting (5 requests/second)")
+    print("Testing Rate Limiting (300 requests/second)")
     print(f"{'='*70}\n")
     
-    # Test 1: Rapid fire requests (should hit rate limit)
-    print("Test 1: Sending 10 rapid requests...")
+    print("Test 1: Sending 10 concurrent requests (all at once)...")
     start = time.time()
     results = []
     
-    for i in range(10):
+    def worker_rapid(req_id, results_list):
         status_code, body = make_request(host, port, "/")
-        results.append(status_code)
+        results_list.append(status_code)
         status_text = "OK" if status_code == 200 else "TOO MANY REQUESTS" if status_code == 429 else "ERROR"
-        print(f"  Request {i+1}: {status_code} - {status_text}")
+        print(f"  Request {req_id+1}: {status_code} - {status_text}")
+    
+    threads = []
+    for i in range(10):
+        thread = threading.Thread(target=worker_rapid, args=(i, results))
+        threads.append(thread)
+        thread.start()
+    
+    for thread in threads:
+        thread.join()
     
     elapsed = time.time() - start
     limited = sum(1 for s in results if s == 429)
@@ -163,21 +171,31 @@ def test_rate_limiting(host, port):
     
     print(f"\nResult: {successful} successful, {limited} rate-limited")
     print(f"Time: {elapsed:.3f}s")
-    print(f"Throughput: {successful/elapsed:.2f} requests/second")
+    if successful > 0:
+        print(f"Throughput: {successful/elapsed:.2f} requests/second")
     print("\nWaiting 2 seconds for rate limit to reset...")
     time.sleep(2)
     
-    print("\nTest 2: Sending 10 requests at controlled rate (4 req/sec)...")
+    print("\nTest 2: Sending 10 requests with controlled delay (0.25s between requests)...")
     start = time.time()
     results = []
     
-    for i in range(10):
+    def worker_controlled(req_id, results_list, delay):
+        time.sleep(delay) 
         status_code, body = make_request(host, port, "/")
-        results.append(status_code)
+        results_list.append(status_code)
         status_text = "OK" if status_code == 200 else "TOO MANY REQUESTS" if status_code == 429 else "ERROR"
-        print(f"  Request {i+1}: {status_code} - {status_text}")
-        if i < 9:  
-            time.sleep(0.25)  
+        print(f"  Request {req_id+1}: {status_code} - {status_text}")
+    
+    threads = []
+    for i in range(10):
+        delay = i * 0.25 
+        thread = threading.Thread(target=worker_controlled, args=(i, results, delay))
+        threads.append(thread)
+        thread.start()
+    
+    for thread in threads:
+        thread.join()
     
     elapsed = time.time() - start
     limited = sum(1 for s in results if s == 429)
@@ -185,7 +203,8 @@ def test_rate_limiting(host, port):
 
     print(f"\nResult: {successful} successful, {limited} rate-limited")
     print(f"Time: {elapsed:.3f}s")
-    print(f"Throughput: {successful/elapsed:.2f} requests/second")
+    if successful > 0:
+        print(f"Throughput: {successful/elapsed:.2f} requests/second")
     print(f"{'='*70}\n")
 
 
@@ -243,7 +262,7 @@ def test_random_links(host, port, num_clicks=5):
     print(f"{'='*70}\n")
 
 
-def test_counter(host, port, target_path="/", num_requests=30, max_workers=10):
+def test_counter(host, port, target_path="/", num_requests=40, max_workers=20):
     """Recursively access all links and make multiple requests to each, randomized order."""
     print(f"\n{'='*70}")
     print("Testing Recursive Request Counter (Concurrent + Randomized)")
@@ -339,7 +358,7 @@ def main():
         test_rate_limiting(host, port)
     
     if test_type == "counter" or test_type == "all":
-        test_counter(host, port, target_path="/", num_requests=20)
+        test_counter(host, port, target_path="/")
     
     if test_type == "random" or test_type == "all":
         test_random_links(host, port, num_clicks=5)

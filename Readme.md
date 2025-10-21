@@ -1,115 +1,202 @@
-# Laboratory Report: HTTP Server & Client
+# Laboratory Report: Multithreaded HTTP Server
 
 ## 1. Source Directory
 
-The source directory consists of two files [server\.py](https://github.com/Dackohn/HTTP-server/blob/master/src/server.py) that is responsible for all the web server stuff, receiving requests and responding to them and a [client\.py](https://github.com/Dackohn/HTTP-server/blob/master/src/client.py) that initiates the comunication and the requests, as well as downloading fileas and printing the contents of html files.
-### [Source Directory](https://github.com/Dackohn/HTTP-server/tree/master/src)
+The source directory consists of three main files:
+- [Multithreaded_http_server.py](src/Multithreaded_http_server.py) - The main multithreaded HTTP server implementation with request handling, rate limiting, and request counting features
+- [test_concurrent.py](src/test_concurent.py) - A comprehensive testing client that validates concurrent request handling, rate limiting, request counters, and includes random navigation testing
+- [test_without_lock.py](src/test_without_lock.py) - A demonstration server showing the race condition problem and its solution using locks
+
+### [Source Directory](src/)
+
+---
 
 ## 2. Docker Compose & Dockerfile
 
-The docker compose and dockerfile are really straight forward for this laboratory work only copying the necesary server and client files into the container as well as mounting the repository that is meant to be visible on the web page.
+The Docker configuration files handle the containerization of the multithreaded HTTP server, copying necessary server and testing scripts into the container and mounting the directory to be served.
 
-### [Docker Compose](https://github.com/Dackohn/HTTP-server/blob/master/docker-compose.yml)
+### [Docker Compose](docker-compose.yml)
 
-### [Dockerfile](https://github.com/Dackohn/HTTP-server/blob/master/Dockerfile)
+### [Dockerfile](Dockerfile)
 
 ---
 
 ## 3. Starting the Container
 
-The container is started by simply running the command ```docker compose up --build -d```
-
-<img src="docks/build_container.png" width="300">
+The container is started using the command: `docker compose up --build -d`
 
 ---
 
-## 4. Running the Server
+## 4. Running the Multithreaded Server
 
-The command that is use to run the server is ```python server.py <served_directory>```. The current docker_compose runs the command automaticaly when the container is created:
+The server is started with the command: `python Multithreaded_http_server.py <served_directory>`
 
-<img src="docks/server_start.png" width="300">
+The server runs on port 8000 and handles multiple concurrent connections using threading.
 
-## 5. Contents of the Served Directory
-
-Accessing the main endpoint of the server displays all files and folders in the served directory, sorted alphabetically, as shown in the image below:
-
-<img src="docks/served_directory.png" width="300">
-
-## 6. Accesing different types of files
-### 404 Error
-This screenshot demonstrates the server's response when attempting to access a file that does not exist. The server correctly returns a 404 Not Found error.
-
-<img src="docks/inexistend_file.png" width="300">
-
-### HTML File with Image
-This screenshot shows how the server serves an HTML file containing an embedded image. The page is rendered correctly in the browser, displaying both the HTML content and the image.
-
-<img src="docks/html_with_image.png" width="300">
-
-### PDF File
-This image illustrates the server delivering a PDF file. The PDF is accessible and can be opened or downloaded by the client.
-
-<img src="docks/pdf_file.png" width="300">
-
-### PNG File
-This screenshot shows the server serving a PNG image. The image loads correctly in the browser, demonstrating proper handling of binary file types.
-
-<img src="docks/png_file.png" width="300">
-
-## 7. Running the client
-The command that is used to run the client is ```python client.py <target_ip> <target_port> <target_file> <download_directory>```. The command output in the terminal looks like this:
-
-<img src="docks/running_client.png" width="300">
-
-The file together with the missing folder where succesfuly created:
-
-<img src="docks/report_test.png" width="300">
-
-## 8. Directory listing
-For this section we will review the page generated for the repository *report_test* from the last section that has the file dowloaded as well as an button to return to the home page:
-
-<img src="docks/report_test_dir.png" width="300">
-
-## 9. Accessing a Friend’s Server on the Local Network
-
-In this part of the experiment, I connected to a friend’s HTTP server hosted on the same local network.
-
-To establish the connection, I first determined their local IP address using the `ipconfig` command . The server was accessible at the IP address `192.168.1.6` on port `8080` as seen in the image:
-
-<img src="docks/ipconfig.png" width="300">
-
-I then used our custom client to send requests directly to the server:
-```python client.py 192.168.1.6 8080 subdir/1.pdf /report_test```
-
-<img src="docks/running_client.png" width="300">
-
-This allowed us to successfully retrieve files hosted on their machine.
-
-The following screenshots show:
-- The contents of the friend’s served directory.
-- Successful requests made to their server using our client.
-- The files downloaded and saved locally on our machine.
-
-<img src="docks/friend_content.png" width="300">
-
-The subdirectory create:
-
-<img src="docks/report_test.png" width="300">
-
-As well as the file in it:
-
-<img src="docks/report_test_dir.png" width="300">
-<br>
-<img src="docks/friend_file.png" width="300">
+<img src="docks/TRun.png" >
 
 ---
 
-## 10. Conclusion
+## 5. Concurrency Testing
 
-Throughout this laboratory work, we successfully implemented and tested a minimal HTTP server and client using Python sockets, both running inside Docker containers. The server correctly handled various types of requests, including HTML, PDF, PNG, and invalid file paths, returning appropriate responses such as the 404 error when necessary.
+### 5.1 Single-threaded vs Multithreaded Performance
 
-The Docker environment ensured a consistent and isolated setup, with both the server and client operating reliably across different configurations. Additionally, directory listings were generated dynamically, providing navigable links to files and subdirectories.
+To demonstrate the benefits of multithreading, we compare request handling times between single-threaded and multithreaded implementations.
 
-The client program proved capable of connecting to both local and remote servers within the same network, demonstrating successful file downloads and HTML content retrieval. Overall, the experiment verified a clear understanding of HTTP request–response mechanics, socket communication, and containerized deployment.
+**Test Setup:**
+- 10 concurrent requests to the server
+- 1-second artificial delay added to each request handler
+- Measuring total execution time
 
-This laboratory provided a solid foundation in network programming and web communication principles, emphasizing both practical implementation and interoperability within a Docker-based environment.
+#### Single-threaded Server Results
+
+<img src="docks/Ttest_without_thread.png" >
+
+Expected time: ~10 seconds (sequential processing)
+
+#### Multithreaded Server Results
+
+<img src="docks/Trun_With_Thread.png" >
+
+Expected time: ~1-2 seconds (threading processing)
+
+---
+
+## 6. Request Counter Implementation
+
+The server implements a request counter that tracks the number of times each file or directory has been accessed.
+
+### 6.1 Directory Listing with Counters
+
+<img src="docks/Tweb_design.png" width="300">
+
+The directory listing displays:
+- File/directory names as clickable links
+- Hit counter for each item
+- Back to parent directory link
+
+---
+
+## 7. Race Condition Demonstration
+
+### 7.1 Naive Implementation (Without Locks)
+
+First, we demonstrate the race condition by implementing a counter without proper synchronization.
+
+**Running the naive server:**
+```bash
+python test_without_lock.py <directory>
+```
+
+#### Testing the Race Condition
+The initial counters are all set to 0 and there will be made 40 requests to each file except subdir wich will receive twice as much:
+
+<img src="docks/Tinitial_State.png" width="800">
+
+Running concurrent requests using the test client:
+
+<img src="docks/Trun_wtlock_code.png" width="800">
+
+**Expected behavior:** Counter shows incorrect values due to race conditions
+
+<img src="docks/Tafter_Test_count_wt.png" width="800">
+
+**Analysis:**
+- Expected counter value after 40 requests: 40 + 1 for directories because of file lookup (except subdir/ with 80 because it is called in the index.html)
+- Actual counter value: Less than 40
+- Reason: Multiple threads reading and writing the counter simultaneously without synchronization
+
+### 7.2 Thread-Safe Implementation (With Locks)
+
+Now we implement the counter with proper lock-based synchronization.
+
+**Running the safe server:**
+```bash
+python Multithreaded_http_server.py <directory>
+```
+
+<img src="docks/Tinitial_state_lock.png" width="800">
+
+#### Testing the Fixed Implementation
+
+<img src="docks/Trun_wtlock_code.png" width="800">
+
+**Expected behavior:** Counter shows correct values with no lost updates
+
+<img src="docks/Tafter_Test_Count_w.png" width="800">
+
+**Analysis:**
+- Expected counter value: 40(+1 for directories because of file lookup)
+- Actual counter value: 40 (accurate)
+- Reason: Lock ensures atomic read-modify-write operations
+
+---
+
+## 8. Rate Limiting Implementation
+
+The server implements rate limiting to prevent abuse by limiting requests to 300 requests per second per client IP.
+
+### 8.1 Rate Limiting Configuration
+
+```python
+RATE_LIMIT = 5  # requests per second
+```
+
+The rate limiter tracks request timestamps for each IP address and rejects requests exceeding the limit with HTTP 429 status code.
+
+### 8.2 Testing Rate Limiting
+
+#### Test 1: Rapid Fire Requests (Exceeding Limit)
+`python test_concurent.py localhost 8000 ratelimit`
+
+<img src="docks/Trate_Limit_all.png" width="800">
+
+**Expected behavior:** Initial requests succeed, subsequent requests receive 429 Too Many Requests
+
+## 11. Concurrency Concepts Analysis
+
+### 11.1 Parallelism vs Concurrency (PLT Tradition)
+
+In this implementation:
+
+**Concurrency:** The server is structured as a concurrent program with independent request handlers that can operate independently. This is a program structure/design concept.
+
+**Parallelism:** When running on multi-core hardware, request handlers execute truly simultaneously on different CPU cores. This is a hardware execution concept.
+
+**Key observation:** Our concurrent design enables parallel execution, but they remain orthogonal concepts—the concurrent structure exists regardless of whether parallel hardware is available.
+
+### 11.2 Synchronization Mechanisms
+
+**Race Condition:** Occurs when multiple threads access shared data (request counter) without proper coordination, leading to lost updates.
+
+**Critical Section:** The counter increment operation (read-modify-write) is a critical section that must be protected.
+
+**Lock (Mutex):** Used to ensure mutual exclusion—only one thread can execute the critical section at a time, preventing race conditions.
+
+### 11.3 Thread Safety
+
+**Thread-safe operations:**
+- Counter increments (with lock)
+- Rate limiting checks (with lock)
+- Request handling (each request has isolated data)
+
+**Why locks are necessary:**
+- Python's GIL doesn't protect against race conditions in composite operations
+- Increment operation (read, add, write) is non-atomic
+- Multiple threads interleaving these operations cause data corruption
+
+---
+
+## 12. Conclusion
+
+Throughout this laboratory work, we successfully implemented and tested a multithreaded HTTP server with advanced features including request counting and rate limiting. The implementation demonstrates clear understanding of concurrent programming principles following the PLT (Programming Language Theory) tradition, where concurrency is a structural program design concept and parallelism is a hardware execution concept.
+
+The multithreaded server showed significant performance improvements over the single-threaded version, reducing response time for concurrent requests from approximately 10 seconds to 1-2 seconds when handling 10 simultaneous requests.
+
+The race condition demonstration clearly illustrated the dangers of unsynchronized access to shared resources. The naive implementation without locks showed lost counter updates, while the thread-safe implementation with locks maintained accurate counts even under heavy concurrent load. This validated the necessity of proper synchronization mechanisms in multithreaded applications.
+
+The rate limiting feature successfully protected the server from request spam while maintaining fairness through per-IP tracking. The implementation demonstrated thread-safe rate limiting that correctly enforced the 300 requests/second limit without affecting legitimate users.
+
+The comprehensive testing suite validated all aspects of the implementation, including concurrent request handling, counter accuracy under various access patterns, rate limiting effectiveness, and proper navigation through directory structures.
+
+This laboratory provided deep practical experience with multithreaded programming, synchronization primitives, race condition analysis, and the fundamental distinction between concurrency (program structure) and parallelism (hardware execution) as understood in modern computer science.

@@ -2,6 +2,7 @@ import os
 import sys
 import socket
 from urllib.parse import unquote,quote
+import time
 
 MIME_TYPES = {
     ".html": "text/html",
@@ -60,7 +61,7 @@ def handle_client(conn, base_dir):
         conn.sendall(b"HTTP/1.1 405 Method Not Allowed\r\n\r\n")
         conn.close()
         return
-
+    time.sleep(1)
     target_path = os.path.join(base_dir, path.lstrip("/"))
     if os.path.isdir(target_path):
         body = generate_directory_listing(target_path, path)
